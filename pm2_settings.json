@@ -1,0 +1,15 @@
+{
+    "apps": [{
+        "name": "abbot_project",
+        "script": "server.js",
+        "exec_mode": "cluster",
+        "instances": 1,
+        "watch": true,
+        "ignore_watch": [ "node_modules", "public", ".pm2", "react" ],
+        "log_date_format": "YYYY-MM-DDTHH:MM:SS.SSSZ",
+        "out_file": ".pm2/logs/abbot_project.log",
+        "error_file": ".pm2/logs/abbot_project.log",
+        "merge_logs": true,
+        "wait_ready": true
+    }]
+}
