@@ -6,8 +6,8 @@ import { useEffect, useState } from 'react';
 import { getSurveys, RootState } from '../store/store';
 import { useSelector } from 'react-redux';
 import ArrowForwardIcon from '@mui/icons-material/ArrowForward';
-import DoctorImage from "../assets/doctor.png";
-import Hospitalmage from "../assets/hospital.png";
+import DoctorImage from "../assets/HCP_icon.svg";
+import Hospitalmage from "../assets/CentroSalud_icon.svg";
 
 export default function SurveyList() {
     const navigate = useNavigate();
@@ -31,7 +31,10 @@ export default function SurveyList() {
         });
     }, []);
 
-    const icons = [ Hospitalmage, DoctorImage ];
+    const icons = [ 
+        { expectedLabel: "Centros de Salud", src: Hospitalmage },
+        { expectedLabel: "HCP", src: DoctorImage }
+    ];
 
     return (
         <MobileLayout>
@@ -50,7 +53,7 @@ export default function SurveyList() {
                                         <Typography component="div" sx={{ color: '#1e4479', fontSize: "18px", fontWeight: "500" }}>
                                             {survey.title}
                                         </Typography>
-                                        <img src={ icons[ six ] } height="80px" alt="" />
+                                        <img src={ icons.find( i => i.expectedLabel == survey.title )?.src } height="60px" alt="" />
                                     </Stack>                
                                     <Stack direction="row" justifyContent="center">
                                         <Typography
