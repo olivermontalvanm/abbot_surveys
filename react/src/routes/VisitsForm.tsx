@@ -335,7 +335,10 @@ const VisitsForm: FC = ( ) => {
                         }
                     </TextField>
                     <Stack direction="column" gap="1rem" width="300px" alignSelf="center" justifyContent="center">
-                        <Button sx={{ backgroundColor: "#00b5f0" }} type="submit" variant="contained">Enviar</Button>
+                        <Button
+                            sx={{ backgroundColor: "#00b5f0" }} type="submit" variant="contained" 
+                            disabled={ [ date, time, location, data ].some( d => !d ) }
+                        >Enviar</Button>
                         <Button variant="contained" color="inherit" onClick={ ( ) => clearFields( )}>Limpiar</Button>
                     </Stack>
                 </Stack>
