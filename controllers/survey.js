@@ -265,7 +265,7 @@ class SurveyController {
         data = ( await Visit.findAll( {
             attributes: [ 
                 ["date", "Fecha"], ["time", "Hora"], ["location", "Ubicación"], ["name", "Nombre"],
-                ["lastnames", "Apellidos"], ["service", "Servicio"], ["hospital", "Hospital"],
+                ["lastnames", "Apellidos"], ["service", "Servicio"], ["hospital", "Hospital"], ["country", "Pais"],
                 ["goal", "Objetivo de la visita"], ["brands", "Marca"], ["trainedHcps", "HCP Capacitados"],
                 ["activityDone", "Actividad Realizada"], ["visitResult", "Resultado de Actividad"]
             ],

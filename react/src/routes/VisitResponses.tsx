@@ -125,6 +125,12 @@ const VisitResponses: React.FC = () => {
                                     <Typography variant="body2">Hospital</Typography>
                                     <Typography variant="body1">{ v.hospital }</Typography>
                                 </Box>
+                                <Box sx={{ overflow: "hidden" }}>
+                                    <Typography variant="body2">País</Typography>
+                                    <Typography variant="body1" sx={{ textOverflow: "ellipsis", whiteSpace: "nowrap", overflow: "hidden" }}>
+                                        { v.country }
+                                    </Typography>
+                                </Box>
                                 <Box>
                                     <Typography variant="body2">Objetivo de visita</Typography>
                                     <Typography variant="body1">{ v.goal }</Typography>
