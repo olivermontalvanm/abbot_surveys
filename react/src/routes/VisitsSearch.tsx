@@ -124,7 +124,7 @@ const VisitsForm: FC = ( ) => {
                             ) )
                         )
                     }
-                    { data.length > 0 ? <Typography>Mostrando 50 resultados</Typography> : null }
+                    { data.length == 50 ? <Typography>Mostrando limite de 50 resultados</Typography> : null }
                 </Box>
             </Box>
         </MobileLayout>
