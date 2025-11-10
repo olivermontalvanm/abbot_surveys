@@ -47,7 +47,7 @@ function registerEventHandlers( ) {
 }
 
 function startServer( ) {
-    /*if( config.app.ssl.certPath && config.app.ssl.keyPath ) {
+    if( config.app.ssl.certPath && config.app.ssl.keyPath ) {
         const options = {
             key: fs.readFileSync( config.app.ssl.keyPath ),
             cert: fs.readFileSync( config.app.ssl.certPath )
@@ -57,14 +57,14 @@ function startServer( ) {
             process.send( "ready" );
             console.info( `🌐🔒 Application listening at https://${ config.app.host }:${ config.app.port }` );
         } );
-    } else {*/
+    } else {
         app.listen( config.app.port, config.app.host, () => {
             if( process.send )  {
                 process.send( "ready" );
             }
             console.info( `🌐 Application listening at: http://${ config.app.host }:${ config.app.port }`);
         } );
-    //}
+    }
 }
 
 ( async function main( ) {
