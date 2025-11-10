@@ -5,6 +5,9 @@ import OrdersRouter from "./Surveys";
 import SurveySelection from "./SurveySelection";
 import DynamicSurveyForm from "./DynamicSurveyForm";
 import SurveyResponses from "./SurveyResponses";
+import VisitsSearch from "./VisitsSearch";
+import VisitsForm from "./VisitsForm";
+import VisitResponses from "./VisitResponses";
 
 const AppRoutes: FC = () => {
     return (
@@ -17,6 +20,9 @@ const AppRoutes: FC = () => {
             <Route path="/surveys" element={ <SurveySelection /> } />
             <Route path="/surveys/:surveyid" element={ <DynamicSurveyForm /> } />
             <Route path="/surveys/:surveyid/replies" element={ <SurveyResponses /> } />
+            <Route path="/forms/visits" element={ <VisitsSearch /> } />
+            <Route path="/forms/visits/:submissionId" element={ <VisitsForm /> } />
+            <Route path="/replies/visits" element={ <VisitResponses /> } />
         </Routes>
     );
 };

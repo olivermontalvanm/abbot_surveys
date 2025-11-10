@@ -75,6 +75,42 @@ export default function SurveyList() {
                         </Card>
                     </Grid>
                 ))}
+                <Grid item xs={12} sm={6} md={4}>
+                    <Card
+                        elevation={3}
+                        sx={{
+                            borderRadius: 2
+                        }}
+                    >
+                        <CardActionArea onClick={() => {
+                            window.location.assign( "/forms/visits" );
+                        }}>
+                            <CardContent sx={{ backgroundColor: "#ffffff", height: "140px" }}>
+                                <Stack direction="row" justifyContent="space-between" alignItems="center">
+                                    <Typography component="div" sx={{ color: '#1e4479', fontSize: "18px", fontWeight: "500" }}>
+                                        Visitas
+                                    </Typography>
+                                    <img src={ DoctorImage } height="60px" alt="" />
+                                </Stack>                
+                                <Stack direction="row" justifyContent="center">
+                                    <Typography
+                                        sx={{
+                                            mt: 2,
+                                            color: '#fff',
+                                            fontWeight: 600,
+                                            textTransform: "capitalize",
+                                            borderRadius: 1,
+                                            backgroundColor: "#00b5f0",
+                                            padding: "0.25rem 2rem"
+                                        }}
+                                    >
+                                        INGRESAR
+                                    </Typography>
+                                </Stack>
+                            </CardContent>
+                        </CardActionArea>
+                    </Card>
+                </Grid>
             </Grid>
         </MobileLayout>
     );

@@ -12,7 +12,14 @@ import adminService from "../services/Admin";
 import catalogService from "../services/Catalog";
 import { userRoles } from "../constants";
 import { CatalogOption, RequestCategory } from "../interfaces/Common";
+import dayjs from "dayjs";
 
+
+export interface Visit { 
+    date: string; time: string; location: string; name: string; lastnames: string; 
+    service: string; hospital: string; goal: string; brands: string; trainedHcps: string; 
+    activityDone: string; visitResult: string; id?: number;
+};
 
 const emptyFilterState: Filter = {
     activityOptions: [ ],
@@ -361,6 +368,62 @@ export const getSurveys = createAsyncThunk( "surveys/get-list", async( _, thunkA
     }
 } );
 
+export const getVisits = createAsyncThunk( "visits/get", async( _, thunkAPI ) => {
+    try {
+        const response = await requestService.getVisits( );
+
+        return response.data;
+    } catch ( e ) {
+        if( axios.isAxiosError( e ) ) {
+            return thunkAPI.rejectWithValue( e.response?.status );
+        }
+
+        return thunkAPI.rejectWithValue( "Internal server error" );
+    }
+} );
+
+export const getVisitsCSV = createAsyncThunk( "visits/get/csv", async( _, thunkAPI ) => {
+    try {
+        const response = await requestService.getVisitsCSV( );
+
+        return response.data;
+    } catch ( e ) {
+        if( axios.isAxiosError( e ) ) {
+            return thunkAPI.rejectWithValue( e.response?.status );
+        }
+
+        return thunkAPI.rejectWithValue( "Internal server error" );
+    }
+} );
+
+export const getDataQuery = createAsyncThunk( "queries/get-general-data", async( data: { name?: string; hospital?: string; submissionId?: string }, thunkAPI ) => {
+    try {
+        const response = await requestService.getQuery( data );
+
+        return response.data;
+    } catch ( e ) {
+        if( axios.isAxiosError( e ) ) {
+            return thunkAPI.rejectWithValue( e.response?.status );
+        }
+
+        return thunkAPI.rejectWithValue( "Internal server error" );
+    }
+} );
+
+export const postVisit = createAsyncThunk( "visits/post", async( data: Visit, thunkAPI ) => {
+    try {
+        const response = await requestService.postVisit( data );
+
+        return response.data;
+    } catch ( e ) {
+        if( axios.isAxiosError( e ) ) {
+            return thunkAPI.rejectWithValue( e.response?.status );
+        }
+
+        return thunkAPI.rejectWithValue( "Internal server error" );
+    }
+} );
+
 export const getReplies = createAsyncThunk( "replies/survey/get", async( data: { surveyid: number; }, thunkAPI ) => {
     try {
         const response = await requestService.getReplies( data.surveyid );
@@ -678,6 +741,18 @@ const commonSlice = createSlice( {
                 const link = document.createElement( "a" );
                 link.href = url;
                 link.setAttribute( "download", "data.csv" );
+                document.body.appendChild( link );
+                link.click( );
+                link.remove( );
+            }
+        } )
+        .addCase( getVisitsCSV.fulfilled, ( _, action ) => {
+            if( action.payload ) {
+                const url = window.URL.createObjectURL( new Blob( [ action.payload ] ) );
+
+                const link = document.createElement( "a" );
+                link.href = url;
+                link.setAttribute( "download", `visits_${ dayjs( ).format( "DDMMYYYY_hhmmss" ) }.csv` );
                 document.body.appendChild( link );
                 link.click( );
                 link.remove( );

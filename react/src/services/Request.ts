@@ -1,6 +1,7 @@
 import { CatalogOption, RequestCategory } from "../interfaces/Common";
 import http from "./Http";
 import { Request, RequestNote } from "../interfaces/Models";
+import { Visit } from "../store/store";
 
 export interface DashboardPayload {
     requestCount: number;
@@ -65,6 +66,14 @@ class RequestService {
         return response;
     }
 
+    async getQuery( data: { name?: string, hospital?: string, submissionId?: string } ) {
+        const params = new URLSearchParams( data );
+
+        const response = await http.get( `/api/v1/query?${ params.toString( ) }` );
+
+        return response;
+    }
+
     async getRepliesCSV( surveyid: number ) {
         const response = await http.get( `/api/v1/replies-csv?surveyid=${ surveyid }` );
 
@@ -110,6 +119,24 @@ class RequestService {
 
     async postRequestNote( data: { requestId: number; noteContent: string; } ) {
         const response = await http.post( "/api/v1/request/createNote", data );
+		
+        return response;
+    }
+
+    async postVisit( data: Visit ) {
+        const response = await http.post( "/api/v1/visit", data );
+		
+        return response;
+    }
+
+    async getVisits( ) {
+        const response = await http.get( "/api/v1/visit" );
+		
+        return response;
+    }
+
+    async getVisitsCSV( ) {
+        const response = await http.get( "/api/v1/visit/csv" );
 		
         return response;
     }
