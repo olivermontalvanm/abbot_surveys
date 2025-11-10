@@ -69,7 +69,7 @@ class SurveyController {
                         SELECT DISTINCT
                             a.submissionid
                         FROM Answer a
-                        INNER JOIN Question q ON a.questionid = q.id AND q.label IN ('País', 'Servicio', 'Hospital', 'Nombre', 'Apellidos')
+                        INNER JOIN Question q ON a.questionid = q.id AND q.label IN ('País', 'Servicio', 'Hospital', 'Nombre', 'Apellidos', 'País')
                         INNER JOIN Survey s ON q.surveyid = s.id
                         WHERE s.title = 'HCP' 
                     )
@@ -96,6 +96,7 @@ class SurveyController {
             o.fullname = `${ o.name.trim( ) } ${o.lastnames.trim( )}`
             o.hospital = data.find( d => d.label == "Hospital" && d.submissionid == sId )?.value;
             o.service = data.find( d => d.label == "Servicio" && d.submissionid == sId )?.value;
+            o.country = data.find( d => d.label == "País" && d.submissionid == sId )?.value;
 
             parsedData.push( o );
         }
@@ -345,7 +346,8 @@ class SurveyController {
                 brands: Joi.string( ).trim( ).required( ),
                 trainedHcps: Joi.string( ).trim( ).required( ),
                 activityDone: Joi.string( ).trim( ).required( ),
-                visitResult: Joi.string( ).trim( ).required( )
+                visitResult: Joi.string( ).trim( ).required( ),
+                country: Joi.string( ).trim( ).required( )
             } );
 
             const { error, value } = joiSchema.validate( req.body, { allowUnknown: false } );

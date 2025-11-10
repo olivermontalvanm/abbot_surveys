@@ -16,7 +16,8 @@ const Visit = sequelize.define( "Visits", {
     brands: { type: DataTypes.STRING, allowNull: false },
     trainedHcps: { type: DataTypes.STRING, allowNull: false },
     activityDone: { type: DataTypes.STRING, allowNull: false },
-    visitResult: { type: DataTypes.STRING, allowNull: false }
+    visitResult: { type: DataTypes.STRING, allowNull: false },
+    country: { type: DataTypes.STRING, allowNull: true }
 }, { tableName: "Visits", timestamps: true } );
 
 module.exports = Visit;

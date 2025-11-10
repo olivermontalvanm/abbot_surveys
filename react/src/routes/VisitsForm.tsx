@@ -24,15 +24,13 @@ const VisitsForm: FC = ( ) => {
     const [ activityDone, setActivityDone ] = useState<string>( activityDoneOptions[ 0 ] );
     const [ activityResult, setActivityResult ] = useState<string>( "" );
     const [ locPermission, setLocPermission ] = useState<boolean>( false );
-    const [ name, setName ] = useState<string>( "" );
-    const [ hospital, setHospital ] = useState<string>( "" );
     const [ loggedUser, setLoggedUser ] = useState<never|null>( null );
     const [ loading, setLoading ] = useState<boolean>( false );
     const [ data, setData ] = useState<{
         name: string;
         fullname: string; hospital: string;
         ix: number; lastnames: string; service: string;
-        submissionId: number;
+        submissionId: number; country: string;
     } | null>( null  );
     const [ toast, setToast ] = useState( { open: false, message: "" } );
 
@@ -103,7 +101,8 @@ const VisitsForm: FC = ( ) => {
             name: data.name, lastnames: data.lastnames, 
             service: data.service, hospital: data.hospital,
             goal: objective, brands: brand, activityDone, 
-            visitResult: activityResult, trainedHcps: trainedHcp
+            visitResult: activityResult, trainedHcps: trainedHcp,
+            country: data.country
         } ) )
         .then( ( ) => {
             setToast( { open: true, message: "Datos enviados con éxito" } );
@@ -157,6 +156,15 @@ const VisitsForm: FC = ( ) => {
                     )
                 }
                 <Stack spacing={2}>
+                    <TextField
+                        disabled
+                        type={"text"}
+                        required={true}
+                        value={data?.country}
+                        onChange={( ) => null}
+                        fullWidth
+                        sx={{ display: "none" }}
+                    />
                     <TextField
                         disabled
                         type={"text"}

@@ -18,7 +18,7 @@ import dayjs from "dayjs";
 export interface Visit { 
     date: string; time: string; location: string; name: string; lastnames: string; 
     service: string; hospital: string; goal: string; brands: string; trainedHcps: string; 
-    activityDone: string; visitResult: string; id?: number;
+    activityDone: string; visitResult: string; id?: number; country: string;
 };
 
 const emptyFilterState: Filter = {
