@@ -75,6 +75,17 @@ const VisitResponses: React.FC = () => {
                 </Typography>
                 <Typography variant="body1" mb={"1.5rem"}>Hasta 50 registros más recientes</Typography>
                 {
+                    visits.length == 0 ? (
+                        <Paper sx={{ p: "1rem" }}>
+                            <Typography 
+                                sx={{ margin: "auto", textAlign: "center" }}
+                            >
+                                No se encontró data...
+                            </Typography>
+                        </Paper> 
+                    ) : null
+                }
+                {
                     visits.map( ( v, ix ) => (
                         <Paper
                             key={ v?.id ?? ix }

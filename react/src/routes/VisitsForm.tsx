@@ -1,4 +1,4 @@
-import { Alert, Box, Button, Card, CardActionArea, CardContent, Divider, Grid, MenuItem, Paper, Snackbar, Stack, TextField, Typography } from "@mui/material";
+import { Alert, AlertTitle, Box, Button, Card, CardActionArea, CardContent, Divider, Grid, MenuItem, Paper, Snackbar, Stack, TextField, Typography } from "@mui/material";
 import { FC, useEffect, useState } from "react";
 import MobileLayout from "../layouts/MobileLayout";
 import TextInput from "../components/inputs/TextInput";
@@ -25,6 +25,7 @@ const VisitsForm: FC = ( ) => {
     const [ trainedHcp, setTrainedHcp ] = useState<string>( trainedHcpOptions[ 0 ] );
     const [ activityDone, setActivityDone ] = useState<string>( activityDoneOptions[ 0 ] );
     const [ activityResult, setActivityResult ] = useState<string>( activityResultOptions[ 0 ] );
+    const [ locPermission, setLocPermission ] = useState<boolean>( false );
     const [ name, setName ] = useState<string>( "" );
     const [ hospital, setHospital ] = useState<string>( "" );
     const [ loggedUser, setLoggedUser ] = useState<never|null>( null );
@@ -112,7 +113,15 @@ const VisitsForm: FC = ( ) => {
         } );
     }
 
-    console.debug( { data } );
+    navigator.permissions.query( { name: "geolocation" } )
+    .then( ps => {
+        if( ps.state === "denied" ) {
+            setLocPermission( false );
+            return;
+        }
+
+        setLocPermission( true );
+    } );
     
     return (
         <MobileLayout>
@@ -141,6 +150,14 @@ const VisitsForm: FC = ( ) => {
                     boxShadow: "0px 10px 15px -3px rgba(0,0,0,0.4)"
                 }}>
                 <Typography variant="h5" fontWeight={500} color="#1e4479" gutterBottom>Registro de Visita</Typography>
+                {
+                    locPermission ? null : (
+                        <Alert severity="error" sx={{ mb: "1rem" }}>
+                            <AlertTitle>No fue posible obtener la ubicación</AlertTitle>
+                            Debe otorgar permiso de ubicación en su navegador para agregar información al formulario.
+                        </Alert>
+                    )
+                }
                 <Stack spacing={2}>
                     <TextField
                         disabled
@@ -337,7 +354,7 @@ const VisitsForm: FC = ( ) => {
                     <Stack direction="column" gap="1rem" width="300px" alignSelf="center" justifyContent="center">
                         <Button
                             sx={{ backgroundColor: "#00b5f0" }} type="submit" variant="contained" 
-                            disabled={ [ date, time, location, data ].some( d => !d ) }
+                            disabled={ [ date, time, location, data, locPermission, objective ].some( d => !d ) }
                         >Enviar</Button>
                         <Button variant="contained" color="inherit" onClick={ ( ) => clearFields( )}>Limpiar</Button>
                     </Stack>
