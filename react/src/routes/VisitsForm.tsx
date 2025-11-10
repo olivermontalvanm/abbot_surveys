@@ -13,18 +13,16 @@ const VisitsForm: FC = ( ) => {
     const { submissionId } = useParams( );
     
     const brands = [ "GLUCERNA 1.5", "OSMOLITE", "YEVITY" ];
-    const trainedHcpOptions = [ "SI", "NO" ];
     const activityDoneOptions = [ "SI", "NO" ];
-    const activityResultOptions = [ "Exitosa", "Fallida" ];
     
     const [ date, setDate ] = useState<string>( dayjs( ).format( "DD/MM/YYYY" ) );
     const [ time, setTime ] = useState<string>( dayjs( ).format( "hh:mm a" ) );
     const [ location, setLocation ] = useState<string>( "" );
     const [ objective, setObjective ] = useState<string>( "" );
     const [ brand, setBrand ] = useState<string>( brands[ 0 ] );
-    const [ trainedHcp, setTrainedHcp ] = useState<string>( trainedHcpOptions[ 0 ] );
+    const [ trainedHcp, setTrainedHcp ] = useState<string>( "" );
     const [ activityDone, setActivityDone ] = useState<string>( activityDoneOptions[ 0 ] );
-    const [ activityResult, setActivityResult ] = useState<string>( activityResultOptions[ 0 ] );
+    const [ activityResult, setActivityResult ] = useState<string>( "" );
     const [ locPermission, setLocPermission ] = useState<boolean>( false );
     const [ name, setName ] = useState<string>( "" );
     const [ hospital, setHospital ] = useState<string>( "" );
@@ -92,9 +90,9 @@ const VisitsForm: FC = ( ) => {
         setGeolocation( );
         setObjective( "" );
         setBrand( brands[ 0 ] );
-        setTrainedHcp( trainedHcpOptions[ 0 ] );
+        setTrainedHcp( "" );
         setActivityDone( activityDoneOptions[ 0 ] );
-        setActivityResult( activityResultOptions[ 0 ] );
+        setActivityResult( "" );
     };
 
     const submitData = ( ) => {
@@ -298,23 +296,13 @@ const VisitsForm: FC = ( ) => {
                         }
                     </TextField>
                     <TextField
-                        select
                         label={"HCP Capacitados"}
                         required
+                        type="text"
                         value={ trainedHcp }
                         onChange={e => setTrainedHcp( e.target.value )}
                         fullWidth
-                        InputProps={ {
-                            sx: { height: "40px"  } 
-                        } }
-                        sx={{ backgroundColor: "#ffffff", height: "40px" }}
-                    >
-                        {
-                            trainedHcpOptions.map( ( b, ix ) => (
-                                <MenuItem key={ ix } value={ b }>{ b }</MenuItem>
-                            ) )
-                        }
-                    </TextField>
+                    />
                     <TextField
                         select
                         label={"Se realizó actividad"}
@@ -334,27 +322,17 @@ const VisitsForm: FC = ( ) => {
                         }
                     </TextField>
                     <TextField
-                        select
                         label={"Resultado de la visita"}
                         required
+                        type="text"
                         value={ activityResult }
                         onChange={e => setActivityResult( e.target.value )}
                         fullWidth
-                        InputProps={ {
-                            sx: { height: "40px"  } 
-                        } }
-                        sx={{ backgroundColor: "#ffffff", height: "40px" }}
-                    >
-                        {
-                            activityResultOptions.map( ( b, ix ) => (
-                                <MenuItem key={ ix } value={ b }>{ b }</MenuItem>
-                            ) )
-                        }
-                    </TextField>
+                    />
                     <Stack direction="column" gap="1rem" width="300px" alignSelf="center" justifyContent="center">
                         <Button
                             sx={{ backgroundColor: "#00b5f0" }} type="submit" variant="contained" 
-                            disabled={ [ date, time, location, data, locPermission, objective ].some( d => !d ) }
+                            disabled={ [ date, time, location, data, locPermission, objective, trainedHcp, activityResult ].some( d => !d ) }
                         >Enviar</Button>
                         <Button variant="contained" color="inherit" onClick={ ( ) => clearFields( )}>Limpiar</Button>
                     </Stack>
