@@ -10,6 +10,7 @@ const Option = require( "@models/option" );
 const User = require( "@models/user" );
 const Answer = require("../models/answer");
 const Submission = require("../models/submission");
+const Visit = require("../models/visit");
 const jwt = require( "jsonwebtoken" );
 const config = require( "@root/config" );
 const { orderBy } = require("lodash");
@@ -27,8 +28,138 @@ class SurveyController {
         this.router.post( "/login", [ ], this.postLogin.bind( this ) );
         this.router.get( "/replies", [ this.hasToken ], this.getReplies.bind( this ) );
         this.router.get( "/replies-csv", [ this.hasToken ], this.getRepliesCSV.bind( this ) );
+        this.router.get( "/query", [ ], this.getQuery.bind( this ) );
+        this.router.post( "/visit", [ ], this.postVisit.bind( this ) );
+        this.router.get( "/visit", [ ], this.getVisit.bind( this ) );
+        this.router.get( "/visit/csv", [ ], this.getVisitsCSV.bind( this ) );
     }
 
+    async getQuery( req, res ) {
+        const joiSchema = Joi.object( {
+            hospital: Joi.string( ).trim( ).allow( "" ).optional( ),
+            name: Joi.string( ).trim( ).allow( "" ).optional( ),
+            submissionId: Joi.number( ).allow( "" ).optional( )
+        } );
+
+        let { error, value: { hospital, name, submissionId } } = joiSchema.validate( req.query, { allowUnknown: false } );
+
+        if( !hospital ) hospital = undefined;
+        if( !name ) name = undefined;
+        if( !submissionId ) submissionId = undefined;
+        
+        if( error ) {
+            console.error( error );
+            return res.status( 400 ).json( { message: "Bad Request" } );
+        }
+
+        const DATA_LIMIT = 50;
+
+        const data = await sequelize.query( `
+            SELECT
+                q.label,
+                a.value,
+                a.submissionid 
+            FROM Answer a
+            INNER JOIN Question q ON a.questionid = q.id AND q.label IN ('País', 'Servicio', 'Hospital', 'Nombre', 'Apellidos')
+            ${
+                submissionId !== undefined ? `
+                    WHERE a.submissionid = ${ submissionId }
+                ` : `
+                    WHERE a.submissionid IN (
+                        SELECT DISTINCT
+                            a.submissionid
+                        FROM Answer a
+                        INNER JOIN Question q ON a.questionid = q.id AND q.label IN ('País', 'Servicio', 'Hospital', 'Nombre', 'Apellidos')
+                        INNER JOIN Survey s ON q.surveyid = s.id
+                        WHERE s.title = 'HCP' 
+                    )
+                `
+            }
+            ORDER BY submissionid ASC
+        `, {
+            type: QueryTypes.SELECT
+        } );
+
+        const submissionIds = new Set( );
+
+        for( const sId of data.map( d => d.submissionid ) ) {
+            submissionIds.add( sId );
+        }
+        
+        const parsedData = [ ];
+
+        for( const sId of Array.from( submissionIds ) ) {
+            const o = { name: "", lastnames: "", hospital: "", fullname: "", service: "", submissionId: sId, ix: null };
+
+            o.name = data.find( d => d.label == "Nombre" && d.submissionid == sId )?.value;
+            o.lastnames = data.find( d => d.label == "Apellidos" && d.submissionid == sId )?.value;
+            o.fullname = `${ o.name.trim( ) } ${o.lastnames.trim( )}`
+            o.hospital = data.find( d => d.label == "Hospital" && d.submissionid == sId )?.value;
+            o.service = data.find( d => d.label == "Servicio" && d.submissionid == sId )?.value;
+
+            parsedData.push( o );
+        }
+
+        if( [ name, hospital ].every( d => !d ) ) return res.status( 200 ).json( parsedData.slice( null, DATA_LIMIT ) );
+
+        const filteredData = parsedData.filter( data => {
+            let fullname = undefined;
+
+            if( name ) {
+                fullname = "";
+
+                if( name ) fullname += name;
+
+                fullname.trim( );
+            }
+            
+            if( hospital && fullname ) {
+                return (
+                    data.hospital.toUpperCase( ).includes( hospital.toUpperCase( ) ) &&
+                    data.fullname.toUpperCase( ).includes( fullname.toUpperCase( ) )
+                )
+            }
+
+            if( hospital ) {
+                return data.hospital.toUpperCase( ).includes( hospital.toUpperCase( ) );
+            }
+
+            if( fullname ) {
+                return data.fullname.toUpperCase( ).includes( fullname.toUpperCase( ) );
+            }
+
+            return false;
+        } );
+
+        let sIx = 1; 
+        filteredData.forEach( fd => fd.ix = sIx++ );
+
+        return res.status( 200 ).json( filteredData.slice( null, DATA_LIMIT ) );
+    }
+
+    _buildGenericCSV( data ) {
+        if (!Array.isArray(data) || data.length === 0) {
+            console.error('❌ Data must be a non-empty array.');
+            return;
+        }
+
+        // Extract headers (keys from the first object)
+        const headers = Object.keys(data[0]);
+
+        // Build CSV content
+        const rows = data.map(obj =>
+            headers.map(header => {
+            const value = obj[header] ?? '';
+            // Escape quotes and commas properly
+            return `"${String(value).replace(/"/g, '""')}"`;
+            }).join(',')
+        );
+
+        const csvContent = [headers.join(','), ...rows].join('\n');
+
+        return csvContent;
+    }
+    
     _buildCSV(data) {
         const submissions = {};
       
@@ -126,6 +257,31 @@ class SurveyController {
         return res.status( 200 ).json( data );
     }
 
+    async getVisitsCSV( req, res ) {
+        let data = [ ];
+        
+        try {
+        data = ( await Visit.findAll( {
+            attributes: [ 
+                ["date", "Fecha"], ["time", "Hora"], ["location", "Ubicación"], ["name", "Nombre"],
+                ["lastnames", "Apellidos"], ["service", "Servicio"], ["hospital", "Hospital"],
+                ["goal", "Objetivo de la visita"], ["brands", "Marca"], ["trainedHcps", "HCP Capacitados"],
+                ["activityDone", "Actividad Realizada"], ["visitResult", "Resultado de Actividad"]
+            ],
+            where: {}
+        } ) )?.map( s => s.toJSON( ) );
+
+        const formattedData = this._buildGenericCSV( data );
+
+        res.setHeader( "Content-Type", "text-csv" );
+        res.setHeader( "Content-Disposition", "attachment; filename='data.csv'");
+
+        return res.status( 200 ).end( formattedData );
+    } catch( e ) { console.debug( e ); }
+
+        return res.status( 200 ).json( data );
+    }
+
     async getReplies( req, res ) {
         const joiSchema = Joi.object( {
             surveyid: Joi.number( ).required( )
@@ -173,6 +329,42 @@ class SurveyController {
         }    
     }    
 
+    async postVisit( req, res ) {
+        try {
+            if( !req?.body ) return res.status( 400 ).json( { message: "Bad Request" } );
+            
+            const joiSchema = Joi.object( {
+                date: Joi.string( ).trim( ).required( ),
+                time: Joi.string( ).trim( ).required( ),
+                location: Joi.string( ).trim( ).required( ),
+                name: Joi.string( ).trim( ).required( ),
+                lastnames: Joi.string( ).trim( ).required( ),
+                service: Joi.string( ).trim( ).required( ),
+                hospital: Joi.string( ).trim( ).required( ),
+                goal: Joi.string( ).trim( ).required( ),
+                brands: Joi.string( ).trim( ).required( ),
+                trainedHcps: Joi.string( ).trim( ).required( ),
+                activityDone: Joi.string( ).trim( ).required( ),
+                visitResult: Joi.string( ).trim( ).required( )
+            } );
+
+            const { error, value } = joiSchema.validate( req.body, { allowUnknown: false } );
+
+            if( error || Object.values( value ).some( v => !v ) ) {
+                console.error( error );
+                return res.status( 400 ).json( { message: "Bad Request" } );
+            }
+
+            const visit = ( await Visit.create( { ...value } ) ).toJSON( );
+
+            return res.status( 200 ).json( visit );
+        } catch ( e ) {
+            console.error( e );
+
+            return res.status( 500 ).json( { message: "Internal server error" } );
+        }
+    }
+    
     async postLogin( req, res ) {
         try {
             if( !req?.body ) return res.status( 400 ).json( { message: "Bad Request" } );
@@ -233,6 +425,16 @@ class SurveyController {
         } ) ).map( s => s.toJSON( ) );
 
         return res.status( 200 ).json( surveys );
+    }
+
+    async getVisit( req, res ) {
+        const visits = ( await Visit.findAll( {
+            where: {},
+            order: [ [ 'createdAt', 'Desc' ] ],
+            limit: 50
+        } ) ).map( s => s.toJSON( ) );
+
+        return res.status( 200 ).json( visits );
     }
 
     async postSurvey( req, res ) {

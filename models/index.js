@@ -5,6 +5,7 @@ const Option = require('@models/option');
 const Submission = require('@models/submission');
 const Answer = require('@models/answer');
 const User = require('@models/user');
+require("@models/visit");
 const config = require( "@root/config" );
 const { checkMandatoryData, insertInitialData } = require( "@models/initialSetup" );
 
