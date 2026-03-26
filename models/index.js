@@ -5,6 +5,7 @@ const Option = require('@models/option');
 const Submission = require('@models/submission');
 const Answer = require('@models/answer');
 const User = require('@models/user');
+const SurveyAccess = require('@models/surveyAccess');
 require("@models/visit");
 const config = require( "@root/config" );
 const { checkMandatoryData, insertInitialData } = require( "@models/initialSetup" );
@@ -27,6 +28,26 @@ Submission.hasMany( Answer, { foreignKey: "submissionid" } );
 
 Answer.belongsTo( Question, { foreignKey: "questionid" } );
 Question.hasMany( Answer, { foreignKey: "questionid" } );
+
+Survey.hasMany(SurveyAccess, { foreignKey: 'surveyId' });
+SurveyAccess.belongsTo(Survey, { foreignKey: 'surveyId' });
+
+User.hasMany(SurveyAccess, { foreignKey: 'userId' });
+SurveyAccess.belongsTo(User, { foreignKey: 'userId' });
+
+User.belongsToMany(Survey, {
+    through: SurveyAccess,
+    foreignKey: "userId",
+    otherKey: "surveyId",
+    as: "surveys"
+});
+
+Survey.belongsToMany(User, {
+    through: SurveyAccess,
+    foreignKey: "surveyId",
+    otherKey: "userId",
+    as: "users"
+});
 
 // Sync all models
 async function syncDatabase() {

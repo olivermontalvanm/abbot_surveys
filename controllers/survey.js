@@ -14,7 +14,7 @@ const Visit = require("../models/visit");
 const jwt = require( "jsonwebtoken" );
 const config = require( "@root/config" );
 const { orderBy } = require("lodash");
-const { QueryTypes } = require("sequelize");
+const { QueryTypes, Sequelize } = require("sequelize");
 const sequelize = require('@root/sequelize');
 
 const Joi = JoiBase.extend( JoiDate );
@@ -419,9 +419,20 @@ class SurveyController {
     
     async getSurvey( req, res ) {
         const surveys = ( await Survey.findAll( {
-            where: {},
+            where: {
+                [Sequelize.Op.or]: [
+                    { limitedAccess: false },
+                    { "$users.id$": req.user.id }
+                ]
+            },
             include: [
-                { model: Question, include: [ { model: Option } ] }
+                { model: Question, include: [ { model: Option } ] },
+                { 
+                    model: User, as: "users", required: false,
+                    where: {
+                        id: req.user.id
+                    }
+                }
             ],
             order: [ [ Question, 'order', 'ASC' ] ]
         } ) ).map( s => s.toJSON( ) );
