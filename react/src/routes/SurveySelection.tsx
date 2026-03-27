@@ -8,6 +8,7 @@ import { useSelector } from 'react-redux';
 import ArrowForwardIcon from '@mui/icons-material/ArrowForward';
 import DoctorImage from "../assets/HCP_icon.svg";
 import Hospitalmage from "../assets/CentroSalud_icon.svg";
+import FormImage from "../assets/google-forms.svg";
 
 export default function SurveyList() {
     const navigate = useNavigate();
@@ -39,7 +40,7 @@ export default function SurveyList() {
     return (
         <MobileLayout>
             <Grid container spacing={3} padding={4}>
-                {surveys.map((survey, six) => (
+                {surveys.filter( s => s.title !== "Visitas" ).map((survey, six) => (
                     <Grid item xs={12} sm={6} md={4} key={survey.id}>
                         <Card
                             elevation={3}
@@ -53,7 +54,7 @@ export default function SurveyList() {
                                         <Typography component="div" sx={{ color: '#1e4479', fontSize: "18px", fontWeight: "500" }}>
                                             {survey.title}
                                         </Typography>
-                                        <img src={ icons.find( i => i.expectedLabel == survey.title )?.src } height="60px" alt="" />
+                                        <img style={{ color: "green", fill: "green" }} src={ icons.find( i => i.expectedLabel == survey.title )?.src ?? FormImage } height="60px" alt="" />
                                     </Stack>                
                                     <Stack direction="row" justifyContent="center">
                                         <Typography
@@ -74,43 +75,51 @@ export default function SurveyList() {
                             </CardActionArea>
                         </Card>
                     </Grid>
-                ))}
-                <Grid item xs={12} sm={6} md={4}>
-                    <Card
-                        elevation={3}
-                        sx={{
-                            borderRadius: 2
-                        }}
-                    >
-                        <CardActionArea onClick={() => {
-                            window.location.assign( "/forms/visits" );
-                        }}>
-                            <CardContent sx={{ backgroundColor: "#ffffff", height: "140px" }}>
-                                <Stack direction="row" justifyContent="space-between" alignItems="center">
-                                    <Typography component="div" sx={{ color: '#1e4479', fontSize: "18px", fontWeight: "500" }}>
-                                        Visitas
-                                    </Typography>
-                                    <img src={ DoctorImage } height="60px" alt="" />
-                                </Stack>                
-                                <Stack direction="row" justifyContent="center">
-                                    <Typography
-                                        sx={{
-                                            mt: 2,
-                                            color: '#fff',
-                                            fontWeight: 600,
-                                            textTransform: "capitalize",
-                                            borderRadius: 1,
-                                            backgroundColor: "#00b5f0",
-                                            padding: "0.25rem 2rem"
-                                        }}
-                                    >
-                                        INGRESAR
-                                    </Typography>
-                                </Stack>
-                            </CardContent>
-                        </CardActionArea>
-                    </Card>
-                </Grid>
+                ) )}
+                {
+                    //  HACK CORREGIR ESTO MAS ADELANTE
+                    /**
+                     * Producto de la prisa...
+                     */
+                    surveys.find( s => s.title === "Visitas" ) && (
+                        <Grid item xs={12} sm={6} md={4}>
+                            <Card
+                                elevation={3}
+                                sx={{
+                                    borderRadius: 2
+                                }}
+                            >
+                                <CardActionArea onClick={() => {
+                                    window.location.assign( "/forms/visits" );
+                                }}>
+                                    <CardContent sx={{ backgroundColor: "#ffffff", height: "140px" }}>
+                                        <Stack direction="row" justifyContent="space-between" alignItems="center">
+                                            <Typography component="div" sx={{ color: '#1e4479', fontSize: "18px", fontWeight: "500" }}>
+                                                Visitas
+                                            </Typography>
+                                            <img src={ DoctorImage } height="60px" alt="" />
+                                        </Stack>                
+                                        <Stack direction="row" justifyContent="center">
+                                            <Typography
+                                                sx={{
+                                                    mt: 2,
+                                                    color: '#fff',
+                                                    fontWeight: 600,
+                                                    textTransform: "capitalize",
+                                                    borderRadius: 1,
+                                                    backgroundColor: "#00b5f0",
+                                                    padding: "0.25rem 2rem"
+                                                }}
+                                            >
+                                                INGRESAR
+                                            </Typography>
+                                        </Stack>
+                                    </CardContent>
+                                </CardActionArea>
+                            </Card>
+                        </Grid>
+                    )
+                }
             </Grid>
         </MobileLayout>
     );
