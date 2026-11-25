@@ -399,6 +399,7 @@ class SurveyController {
                 time: Joi.string( ).trim( ).required( ),
                 location: Joi.string( ).trim( ).required( ),
                 hospital: Joi.string( ).trim( ).required( ),
+                hospitalCountry: Joi.string( ).trim( ).allow( "" ).optional( ),
                 brand: Joi.string( ).trim( ).valid( ...SPECIAL_ACTIVITY_BRANDS ).required( ),
                 topic: Joi.string( ).trim( ).required( ),
                 attendees: Joi.string( ).trim( ).max( 255 ).required( ),
@@ -416,11 +417,14 @@ class SurveyController {
 
             if( !user ) return res.status( 401 ).json( { error: "Unauthorized" } );
 
+            const { hospitalCountry, ...activityData } = value;
+
             const activity = ( await SpecialActivity.create( {
-                ...value,
-                comments: value.comments || null,
+                ...activityData,
+                comments: activityData.comments || null,
                 userId: user.id,
-                country: user.country || null
+                //  Users without a country (e.g. admins) pick from every country: use the hospital's
+                country: user.country || hospitalCountry || null
             } ) ).toJSON( );
 
             return res.status( 200 ).json( activity );

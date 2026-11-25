@@ -85,7 +85,7 @@ const SpecialActivitiesForm: FC = ( ) => {
         setSending( true );
         dispatch( postSpecialActivity( {
             date, time, location,
-            hospital: hospital.hospital, brand,
+            hospital: hospital.hospital, hospitalCountry: hospital.country, brand,
             topic, attendees, comments
         } ) ).unwrap( )
         .then( ( ) => {

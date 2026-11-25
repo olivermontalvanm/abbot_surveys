@@ -25,7 +25,7 @@ export const specialActivityBrands = [ "Osmolite", "Glucerna 1.5", "Jevity", "Ot
 
 export interface SpecialActivity {
     date: string; time: string; location: string; hospital: string; brand: string;
-    topic: string; attendees: string; comments: string;
+    topic: string; attendees: string; comments: string; hospitalCountry?: string;
     id?: number; country?: string | null; createdAt?: string; User?: { username: string; } | null;
 };
 

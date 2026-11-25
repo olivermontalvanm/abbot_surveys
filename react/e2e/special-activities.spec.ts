@@ -155,7 +155,28 @@ test.describe.serial( "Actividades Especiales", ( ) => {
         await expect( page.getByRole( "option" ) ).toHaveCount( expected.length );
         await expect( page.locator( ".MuiAutocomplete-groupLabel" ) ).toHaveText( countries.sort( ( a, b ) => a.localeCompare( b ) ) );
         await expect( page.getByRole( "option", { name: "CEDIMAT", exact: true } ) ).toHaveCount( 1 );
-        await page.keyboard.press( "Escape" );
+
+        //  Admin has no country: the activity takes the hospital's country
+        await page.getByRole( "option", { name: "CEDIMAT", exact: true } ).click( );
+        await page.getByRole( "combobox", { name: "Marca abordada" } ).click( );
+        await page.getByRole( "option", { name: "Osmolite" } ).click( );
+        await page.getByRole( "textbox", { name: "Tema abordado" } ).fill( "Actividad registrada por admin" );
+        await page.getByRole( "textbox", { name: "Cantidad de asistentes" } ).fill( "8" );
+        await page.getByRole( "button", { name: "Enviar" } ).click( );
+        await expect( page.getByText( "Datos enviados con éxito" ) ).toBeVisible( );
+
+        const db = await connect( );
+        try {
+            const [ rows ] = await db.query( `
+                SELECT sa.country, sa.hospital FROM SpecialActivities sa
+                INNER JOIN Users u ON u.id = sa.userId
+                WHERE u.username = ?
+            `, [ e2eUsers.admin.username ] );
+
+            expect( rows ).toEqual( [ { country: "República Dominicana", hospital: "CEDIMAT" } ] );
+        } finally {
+            await db.end( );
+        }
 
         await page.getByRole( "button", { name: /Ver respuestas/ } ).click( );
         await expect( page ).toHaveURL( /\/replies\/special-activities$/ );
@@ -178,6 +199,8 @@ test.describe.serial( "Actividades Especiales", ( ) => {
         expect( header ).toBe( "Usuario,Fecha,Hora,País,Ubicación,Hospital,Marca abordada,Tema abordado,Cantidad de asistentes,Comentarios" );
         expect( csv ).toContain( `"${ e2eUsers.user.username }"` );
         expect( csv ).toContain( "\"Glucerna 1.5\"" );
+        expect( csv ).toContain( `"${ e2eUsers.admin.username }"` );
+        expect( csv ).toContain( "\"República Dominicana\",\"https://www.google.com/maps/place/14.6349,-90.5069\",\"CEDIMAT\"" );
         //  Quotes inside values are escaped
         expect( csv ).toContain( "\"\"buenas prácticas\"\"" );
     } );
