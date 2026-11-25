@@ -1,6 +1,6 @@
 require('module-alias/register');
 require( "../config.js" );
-const { DataTypes } = require( "sequelize" );
+const { DataTypes, Op } = require( "sequelize" );
 const Surveys = require( "../models/survey" );
 const Users = require('../models/user.js');
 const SurveyAccess = require("../models/surveyAccess.js");
@@ -8,7 +8,8 @@ require( "../models/index" );
 
 /**
  * Creates the "Actividades Especiales" form: its table, its Survey entry (used for access
- * control only) and access for every user. Safe to run more than once.
+ * control only) and access for ALLOWED_USERNAMES only (any other user's access is removed).
+ * Safe to run more than once.
  *
  * Run from project root:
  * npx sequelize-cli db:seed --seed seeders/special_activities_form.js --env development
@@ -20,6 +21,7 @@ require( "../models/index" );
 
 const FORM_TITLE = "Actividades Especiales";
 const TABLE_NAME = "SpecialActivities";
+const ALLOWED_USERNAMES = [ "dayanna.rivera" ];
 
 module.exports = {
     write( text, newLine = false ) {
@@ -68,10 +70,25 @@ module.exports = {
 
             form = form.toJSON( );
 
-            const allUsers = ( await Users.findAll( { where: {} } ) ).map( r => r.toJSON( ) );
+            const allowedUsers = ( await Users.findAll( { where: { username: ALLOWED_USERNAMES } } ) ).map( r => r.toJSON( ) );
+
+            for( const username of ALLOWED_USERNAMES ) {
+                if( !allowedUsers.some( u => u.username === username ) ) {
+                    this.write( `⚠️  User '${ username }' not found, no access granted`, true );
+                }
+            }
+
+            this.write( `Removing access of other users to '${ FORM_TITLE }'...` );
+            const revoked = await SurveyAccess.destroy( {
+                where: {
+                    surveyId: form.id,
+                    userId: { [ Op.notIn ]: allowedUsers.length ? allowedUsers.map( u => u.id ) : [ 0 ] }
+                }
+            } );
+            this.write( `${ revoked } removed`, true );
 
             this.write( `Agregando acceso a '${ FORM_TITLE }'...`, true );
-            for( const user of allUsers ) {
+            for( const user of allowedUsers ) {
                 this.write( `\tAcceso a usuario '${ user.username }'...` );
 
                 //  User does not have access
