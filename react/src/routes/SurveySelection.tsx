@@ -16,8 +16,21 @@ export default function SurveyList() {
 
     const [surveys, setSurveys] = useState([]);
 
-    const handleSelect = (id: string) => {
-        navigate(`/surveys/${id}`);
+    //  Forms with their own page; the Survey entry only controls access to them
+    const customForms: Record<string, string> = {
+        "Visitas": "/forms/visits",
+        "Actividades Especiales": "/forms/special-activities"
+    };
+
+    const handleSelect = (survey: { id: string; title: string; }) => {
+        const customFormPath = customForms[ survey.title ];
+
+        if (customFormPath) {
+            window.location.assign(customFormPath);
+            return;
+        }
+
+        navigate(`/surveys/${survey.id}`);
     };
 
     useEffect(() => {
@@ -34,13 +47,14 @@ export default function SurveyList() {
 
     const icons = [ 
         { expectedLabel: "Centros de Salud", src: Hospitalmage },
-        { expectedLabel: "HCP", src: DoctorImage }
+        { expectedLabel: "HCP", src: DoctorImage },
+        { expectedLabel: "Visitas", src: DoctorImage }
     ];
 
     return (
         <MobileLayout>
             <Grid container spacing={3} padding={4}>
-                {surveys.filter( s => s.title !== "Visitas" ).map((survey, six) => (
+                {surveys.map((survey) => (
                     <Grid item xs={12} sm={6} md={4} key={survey.id}>
                         <Card
                             elevation={3}
@@ -48,7 +62,7 @@ export default function SurveyList() {
                                 borderRadius: 2
                             }}
                         >
-                            <CardActionArea onClick={() => handleSelect(survey.id)}>
+                            <CardActionArea onClick={() => handleSelect(survey)}>
                                 <CardContent sx={{ backgroundColor: "#ffffff", height: "140px" }}>
                                     <Stack direction="row" justifyContent="space-between" alignItems="center">
                                         <Typography component="div" sx={{ color: '#1e4479', fontSize: "18px", fontWeight: "500" }}>
@@ -76,50 +90,6 @@ export default function SurveyList() {
                         </Card>
                     </Grid>
                 ) )}
-                {
-                    //  HACK CORREGIR ESTO MAS ADELANTE
-                    /**
-                     * Producto de la prisa...
-                     */
-                    surveys.find( s => s.title === "Visitas" ) && (
-                        <Grid item xs={12} sm={6} md={4}>
-                            <Card
-                                elevation={3}
-                                sx={{
-                                    borderRadius: 2
-                                }}
-                            >
-                                <CardActionArea onClick={() => {
-                                    window.location.assign( "/forms/visits" );
-                                }}>
-                                    <CardContent sx={{ backgroundColor: "#ffffff", height: "140px" }}>
-                                        <Stack direction="row" justifyContent="space-between" alignItems="center">
-                                            <Typography component="div" sx={{ color: '#1e4479', fontSize: "18px", fontWeight: "500" }}>
-                                                Visitas
-                                            </Typography>
-                                            <img src={ DoctorImage } height="60px" alt="" />
-                                        </Stack>                
-                                        <Stack direction="row" justifyContent="center">
-                                            <Typography
-                                                sx={{
-                                                    mt: 2,
-                                                    color: '#fff',
-                                                    fontWeight: 600,
-                                                    textTransform: "capitalize",
-                                                    borderRadius: 1,
-                                                    backgroundColor: "#00b5f0",
-                                                    padding: "0.25rem 2rem"
-                                                }}
-                                            >
-                                                INGRESAR
-                                            </Typography>
-                                        </Stack>
-                                    </CardContent>
-                                </CardActionArea>
-                            </Card>
-                        </Grid>
-                    )
-                }
             </Grid>
         </MobileLayout>
     );

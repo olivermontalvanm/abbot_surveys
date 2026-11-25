@@ -8,6 +8,8 @@ import SurveyResponses from "./SurveyResponses";
 import VisitsSearch from "./VisitsSearch";
 import VisitsForm from "./VisitsForm";
 import VisitResponses from "./VisitResponses";
+import SpecialActivitiesForm from "./SpecialActivitiesForm";
+import SpecialActivityResponses from "./SpecialActivityResponses";
 
 const AppRoutes: FC = () => {
     return (
@@ -23,6 +25,8 @@ const AppRoutes: FC = () => {
             <Route path="/forms/visits" element={ <VisitsSearch /> } />
             <Route path="/forms/visits/:submissionId" element={ <VisitsForm /> } />
             <Route path="/replies/visits" element={ <VisitResponses /> } />
+            <Route path="/forms/special-activities" element={ <SpecialActivitiesForm /> } />
+            <Route path="/replies/special-activities" element={ <SpecialActivityResponses /> } />
         </Routes>
     );
 };

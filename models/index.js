@@ -7,6 +7,8 @@ const Answer = require('@models/answer');
 const User = require('@models/user');
 const SurveyAccess = require('@models/surveyAccess');
 require("@models/visit");
+//  @models/specialActivity is NOT required here on purpose: its table is created by
+//  seeders/special_activities_form.js, so sync( ) below must not create it.
 const config = require( "@root/config" );
 const { checkMandatoryData, insertInitialData } = require( "@models/initialSetup" );
 

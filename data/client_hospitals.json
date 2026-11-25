@@ -1,0 +1,59 @@
+{
+    "Panama": [
+        "CIDELAS",
+        "Complejo Hospitalario Dr Arnulfo Arias Madrid",
+        "Hospital Nacional",
+        "Instituto Oncologico",
+        "Irma Lourdes Tzanetatos",
+        "MINIMED",
+        "Pacífica Salud Costa del Este",
+        "San Miguel Arcangel",
+        "Santa Fé",
+        "Santo Tomás",
+        "Susana Jones Cano",
+        "The Panamá Clínic",
+        "Hospiten Paitilla",
+        "Hospital Rafael Hernández"
+    ],
+    "Guatemala": [
+        "Centro Médico",
+        "Hospital el Pilar",
+        "Hospital General San Juan de Dios",
+        "Hospital Herrera Llerandi",
+        "Hospital la Paz",
+        "Hospital Roosevelt",
+        "Hospital san Vicente",
+        "Instituto Nacional de Cancerologia",
+        "Modular Igss Zona 11",
+        "San Vicente",
+        "Hospital de Villa Nueva",
+        "Seguro social zona 9",
+        "Seguro social de accidentes",
+        "Hospital los Angeles",
+        "Hospital Pedro de Bethacourt Antigua"
+    ],
+    "El Salvador": [
+        "AVANTE",
+        "AVANTE Centro Médico",
+        "Centro Ambulatorio de Cirugía Escalón",
+        "Hospital CECIAN",
+        "Hospital de Diagnóstico",
+        "Hospital de Diagnóstico Escalón",
+        "Hospital General ISSS",
+        "Hospital Militar Central",
+        "Hospital Nacional Saldaña",
+        "Hospital Nacional San Bartolo",
+        "Hospital Profamilia",
+        "Hospital Nacional Zacamil",
+        "Médico Quirurgico ISSS",
+        "Hospital La Esperanza"
+    ],
+    "República Dominicana": [
+        "CEDIMAT",
+        "CECANOT",
+        "Hospital General Plaza de la salud",
+        "INCART",
+        "IDEN",
+        "Hospital Central"
+    ]
+}

@@ -11,6 +11,7 @@ const User = require( "@models/user" );
 const Answer = require("../models/answer");
 const Submission = require("../models/submission");
 const Visit = require("../models/visit");
+const SpecialActivity = require( "@models/specialActivity" );
 const jwt = require( "jsonwebtoken" );
 const config = require( "@root/config" );
 const { orderBy } = require("lodash");
@@ -18,6 +19,11 @@ const { QueryTypes, Sequelize } = require("sequelize");
 const sequelize = require('@root/sequelize');
 
 const Joi = JoiBase.extend( JoiDate );
+
+const SPECIAL_ACTIVITY_BRANDS = [ "Osmolite", "Glucerna 1.5", "Jevity", "Otros" ];
+//  TEMPORARY: hospital list sent by the client (Excel "Panel Centros Nursing"), merged into the
+//  hospitals found in the answers so the ones nobody has registered yet are still selectable.
+const CLIENT_HOSPITALS = require( "@root/data/client_hospitals.json" );
 
 class SurveyController {
     constructor( ) {
@@ -32,6 +38,10 @@ class SurveyController {
         this.router.post( "/visit", [ ], this.postVisit.bind( this ) );
         this.router.get( "/visit", [ ], this.getVisit.bind( this ) );
         this.router.get( "/visit/csv", [ ], this.getVisitsCSV.bind( this ) );
+        this.router.get( "/special-activity/hospitals", [ this.hasToken ], this.getSpecialActivityHospitals.bind( this ) );
+        this.router.post( "/special-activity", [ this.hasToken ], this.postSpecialActivity.bind( this ) );
+        this.router.get( "/special-activity", [ this.hasToken ], this.getSpecialActivities.bind( this ) );
+        this.router.get( "/special-activity/csv", [ this.hasToken ], this.getSpecialActivitiesCSV.bind( this ) );
     }
 
     async getQuery( req, res ) {
@@ -281,6 +291,144 @@ class SurveyController {
     } catch( e ) { console.debug( e ); }
 
         return res.status( 200 ).json( data );
+    }
+
+    async getSpecialActivitiesCSV( req, res ) {
+        try {
+            const data = ( await SpecialActivity.findAll( {
+                include: [ { model: User, attributes: [ "username" ] } ],
+                order: [ [ "createdAt", "ASC" ] ]
+            } ) ).map( s => s.toJSON( ) ).map( s => ( {
+                "Usuario": s.User?.username,
+                "Fecha": s.date,
+                "Hora": s.time,
+                "País": s.country,
+                "Ubicación": s.location,
+                "Hospital": s.hospital,
+                "Marca abordada": s.brand,
+                "Tema abordado": s.topic,
+                "Cantidad de asistentes": s.attendees,
+                "Comentarios": s.comments
+            } ) );
+
+            //  BOM so Excel detects UTF-8 (accents in headers and values)
+            const formattedData = "\uFEFF" + ( this._buildGenericCSV( data ) ?? "" );
+
+            res.setHeader( "Content-Type", "text-csv" );
+            res.setHeader( "Content-Disposition", "attachment; filename='data.csv'");
+
+            return res.status( 200 ).end( formattedData );
+        } catch ( e ) {
+            console.error( e );
+
+            return res.status( 500 ).json( { message: "Internal server error" } );
+        }
+    }
+
+    async getSpecialActivityHospitals( req, res ) {
+        try {
+            const user = await User.findOne( { where: { id: req.user.id } } );
+
+            if( !user ) return res.status( 401 ).json( { error: "Unauthorized" } );
+
+            const country = user.country || null;
+
+            const hospitals = await sequelize.query( `
+                SELECT
+                    TRIM( p.value ) AS country,
+                    MIN( TRIM( h.value ) ) AS hospital
+                FROM Answer h
+                INNER JOIN Question hq ON h.questionid = hq.id AND hq.label IN ( 'Nombre del hospital', 'Hospital' )
+                INNER JOIN Answer p ON p.submissionid = h.submissionid
+                INNER JOIN Question pq ON p.questionid = pq.id AND pq.label = 'País'
+                WHERE TRIM( h.value ) <> '' AND TRIM( p.value ) <> ''
+                ${ country ? "AND TRIM( p.value ) = :country" : "" }
+                GROUP BY TRIM( p.value ), UPPER( TRIM( h.value ) )
+            `, {
+                replacements: { country },
+                type: QueryTypes.SELECT
+            } );
+
+            const known = new Set( hospitals.map( h => `${ h.country }|${ h.hospital.toUpperCase( ) }` ) );
+
+            for( const [ hCountry, names ] of Object.entries( CLIENT_HOSPITALS ) ) {
+                if( country && hCountry !== country ) continue;
+
+                for( const hospital of names ) {
+                    const key = `${ hCountry }|${ hospital.toUpperCase( ) }`;
+
+                    if( known.has( key ) ) continue;
+
+                    known.add( key );
+                    hospitals.push( { country: hCountry, hospital } );
+                }
+            }
+
+            hospitals.sort( ( a, b ) => a.country.localeCompare( b.country ) || a.hospital.localeCompare( b.hospital ) );
+
+            return res.status( 200 ).json( hospitals );
+        } catch ( e ) {
+            console.error( e );
+
+            return res.status( 500 ).json( { message: "Internal server error" } );
+        }
+    }
+
+    async getSpecialActivities( req, res ) {
+        try {
+            const activities = ( await SpecialActivity.findAll( {
+                include: [ { model: User, attributes: [ "username" ] } ],
+                order: [ [ "createdAt", "DESC" ] ],
+                limit: 50
+            } ) ).map( s => s.toJSON( ) );
+
+            return res.status( 200 ).json( activities );
+        } catch ( e ) {
+            console.error( e );
+
+            return res.status( 500 ).json( { message: "Internal server error" } );
+        }
+    }
+
+    async postSpecialActivity( req, res ) {
+        try {
+            if( !req?.body ) return res.status( 400 ).json( { message: "Bad Request" } );
+
+            const joiSchema = Joi.object( {
+                date: Joi.string( ).trim( ).required( ),
+                time: Joi.string( ).trim( ).required( ),
+                location: Joi.string( ).trim( ).required( ),
+                hospital: Joi.string( ).trim( ).required( ),
+                brand: Joi.string( ).trim( ).valid( ...SPECIAL_ACTIVITY_BRANDS ).required( ),
+                topic: Joi.string( ).trim( ).required( ),
+                attendees: Joi.string( ).trim( ).max( 255 ).required( ),
+                comments: Joi.string( ).trim( ).allow( "" ).optional( )
+            } );
+
+            const { error, value } = joiSchema.validate( req.body, { allowUnknown: false } );
+
+            if( error ) {
+                console.error( error );
+                return res.status( 400 ).json( { message: "Bad Request" } );
+            }
+
+            const user = await User.findOne( { where: { id: req.user.id } } );
+
+            if( !user ) return res.status( 401 ).json( { error: "Unauthorized" } );
+
+            const activity = ( await SpecialActivity.create( {
+                ...value,
+                comments: value.comments || null,
+                userId: user.id,
+                country: user.country || null
+            } ) ).toJSON( );
+
+            return res.status( 200 ).json( activity );
+        } catch ( e ) {
+            console.error( e );
+
+            return res.status( 500 ).json( { message: "Internal server error" } );
+        }
     }
 
     async getReplies( req, res ) {

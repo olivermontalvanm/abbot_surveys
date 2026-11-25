@@ -21,6 +21,16 @@ export interface Visit {
     activityDone: string; visitResult: string; id?: number; country: string;
 };
 
+export const specialActivityBrands = [ "Osmolite", "Glucerna 1.5", "Jevity", "Otros" ];
+
+export interface SpecialActivity {
+    date: string; time: string; location: string; hospital: string; brand: string;
+    topic: string; attendees: string; comments: string;
+    id?: number; country?: string | null; createdAt?: string; User?: { username: string; } | null;
+};
+
+export interface SpecialActivityHospital { country: string; hospital: string; };
+
 const emptyFilterState: Filter = {
     activityOptions: [ ],
     statusOptions: [
@@ -396,6 +406,62 @@ export const getVisitsCSV = createAsyncThunk( "visits/get/csv", async( _, thunkA
     }
 } );
 
+export const getSpecialActivityHospitals = createAsyncThunk( "specialActivities/hospitals/get", async( _, thunkAPI ) => {
+    try {
+        const response = await requestService.getSpecialActivityHospitals( );
+
+        return response.data;
+    } catch ( e ) {
+        if( axios.isAxiosError( e ) ) {
+            return thunkAPI.rejectWithValue( e.response?.status );
+        }
+
+        return thunkAPI.rejectWithValue( "Internal server error" );
+    }
+} );
+
+export const postSpecialActivity = createAsyncThunk( "specialActivities/post", async( data: SpecialActivity, thunkAPI ) => {
+    try {
+        const response = await requestService.postSpecialActivity( data );
+
+        return response.data;
+    } catch ( e ) {
+        if( axios.isAxiosError( e ) ) {
+            return thunkAPI.rejectWithValue( e.response?.status );
+        }
+
+        return thunkAPI.rejectWithValue( "Internal server error" );
+    }
+} );
+
+export const getSpecialActivities = createAsyncThunk( "specialActivities/get", async( _, thunkAPI ) => {
+    try {
+        const response = await requestService.getSpecialActivities( );
+
+        return response.data;
+    } catch ( e ) {
+        if( axios.isAxiosError( e ) ) {
+            return thunkAPI.rejectWithValue( e.response?.status );
+        }
+
+        return thunkAPI.rejectWithValue( "Internal server error" );
+    }
+} );
+
+export const getSpecialActivitiesCSV = createAsyncThunk( "specialActivities/get/csv", async( _, thunkAPI ) => {
+    try {
+        const response = await requestService.getSpecialActivitiesCSV( );
+
+        return response.data;
+    } catch ( e ) {
+        if( axios.isAxiosError( e ) ) {
+            return thunkAPI.rejectWithValue( e.response?.status );
+        }
+
+        return thunkAPI.rejectWithValue( "Internal server error" );
+    }
+} );
+
 export const getDataQuery = createAsyncThunk( "queries/get-general-data", async( data: { name?: string; hospital?: string; submissionId?: string }, thunkAPI ) => {
     try {
         const response = await requestService.getQuery( data );
@@ -753,6 +819,18 @@ const commonSlice = createSlice( {
                 const link = document.createElement( "a" );
                 link.href = url;
                 link.setAttribute( "download", `visits_${ dayjs( ).format( "DDMMYYYY_hhmmss" ) }.csv` );
+                document.body.appendChild( link );
+                link.click( );
+                link.remove( );
+            }
+        } )
+        .addCase( getSpecialActivitiesCSV.fulfilled, ( _, action ) => {
+            if( action.payload ) {
+                const url = window.URL.createObjectURL( new Blob( [ action.payload ], { type: "text/csv;charset=utf-8" } ) );
+
+                const link = document.createElement( "a" );
+                link.href = url;
+                link.setAttribute( "download", `actividades_especiales_${ dayjs( ).format( "DDMMYYYY_hhmmss" ) }.csv` );
                 document.body.appendChild( link );
                 link.click( );
                 link.remove( );

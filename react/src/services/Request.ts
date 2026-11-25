@@ -1,7 +1,7 @@
 import { CatalogOption, RequestCategory } from "../interfaces/Common";
 import http from "./Http";
 import { Request, RequestNote } from "../interfaces/Models";
-import { Visit } from "../store/store";
+import { SpecialActivity, SpecialActivityHospital, Visit } from "../store/store";
 
 export interface DashboardPayload {
     requestCount: number;
@@ -137,6 +137,30 @@ class RequestService {
 
     async getVisitsCSV( ) {
         const response = await http.get( "/api/v1/visit/csv" );
+		
+        return response;
+    }
+
+    async getSpecialActivityHospitals( ) {
+        const response = await http.get<SpecialActivityHospital[ ]>( "/api/v1/special-activity/hospitals" );
+		
+        return response;
+    }
+
+    async postSpecialActivity( data: SpecialActivity ) {
+        const response = await http.post<SpecialActivity>( "/api/v1/special-activity", data );
+		
+        return response;
+    }
+
+    async getSpecialActivities( ) {
+        const response = await http.get<SpecialActivity[ ]>( "/api/v1/special-activity" );
+		
+        return response;
+    }
+
+    async getSpecialActivitiesCSV( ) {
+        const response = await http.get( "/api/v1/special-activity/csv" );
 		
         return response;
     }
