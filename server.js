@@ -53,8 +53,10 @@ function startServer( ) {
             cert: fs.readFileSync( config.app.ssl.certPath )
         };
         
-        https.createServer( options, app ).listen( config.app.port, ( ) => {
-            process.send( "ready" );
+        https.createServer( options, app ).listen( config.app.port, config.app.host, ( ) => {
+            if( process.send )  {
+                process.send( "ready" );
+            }
             console.info( `🌐🔒 Application listening at https://${ config.app.host }:${ config.app.port }` );
         } );
     } else {
