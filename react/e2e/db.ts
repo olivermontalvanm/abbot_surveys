@@ -12,7 +12,7 @@ const rootRequire = createRequire( path.join( rootDir, "package.json" ) );
 rootRequire( "dotenv" ).config( { path: path.join( rootDir, ".env" ) } );
 const mysql = rootRequire( "mysql2/promise" );
 
-export const FORM_TITLE = "Actividades Especiales";
+export const FORM_TITLE = "Capacitaciones Especiales";
 export const credentialsFile = path.join( here, ".env.e2e" );
 
 export const e2eUsers = {

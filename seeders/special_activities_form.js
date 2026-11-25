@@ -7,7 +7,7 @@ const SurveyAccess = require("../models/surveyAccess.js");
 require( "../models/index" );
 
 /**
- * Creates the "Actividades Especiales" form: its table, its Survey entry (used for access
+ * Creates the "Capacitaciones Especiales" form (formerly "Actividades Especiales"): its table, its Survey entry (used for access
  * control only) and access for ALLOWED_USERNAMES only (any other user's access is removed).
  * Safe to run more than once.
  *
@@ -19,9 +19,11 @@ require( "../models/index" );
  * npx sequelize-cli db:seed:undo --seed seeders/special_activities_form.js --env { env }
  */
 
-const FORM_TITLE = "Actividades Especiales";
+const FORM_TITLE = "Capacitaciones Especiales";
+//  Previous titles of this same form; renamed to FORM_TITLE when found
+const LEGACY_TITLES = [ "Actividades Especiales" ];
 const TABLE_NAME = "SpecialActivities";
-const ALLOWED_USERNAMES = [ "dayanna.rivera" ];
+const ALLOWED_USERNAMES = [ "dayana.rivera" ];
 
 module.exports = {
     write( text, newLine = false ) {
@@ -60,12 +62,18 @@ module.exports = {
 
             this.write( `Creating form '${ FORM_TITLE }'...` );
             let form = await Surveys.findOne( { where: { title: FORM_TITLE } } );
+            const legacyForm = form ? null : await Surveys.findOne( { where: { title: LEGACY_TITLES } } );
 
-            if( !form ) {
+            if( form ) {
+                this.write( "Already existed", true );
+            } else if( legacyForm ) {
+                const oldTitle = legacyForm.title;
+
+                form = await legacyForm.update( { title: FORM_TITLE } );
+                this.write( `Renamed from '${ oldTitle }'`, true );
+            } else {
                 form = await Surveys.create( { title: FORM_TITLE, limitedAccess: true } );
                 this.write( "OK", true );
-            } else {
-                this.write( "Already existed", true );
             }
 
             form = form.toJSON( );

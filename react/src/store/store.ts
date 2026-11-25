@@ -830,7 +830,7 @@ const commonSlice = createSlice( {
 
                 const link = document.createElement( "a" );
                 link.href = url;
-                link.setAttribute( "download", `actividades_especiales_${ dayjs( ).format( "DDMMYYYY_hhmmss" ) }.csv` );
+                link.setAttribute( "download", `capacitaciones_especiales_${ dayjs( ).format( "DDMMYYYY_hhmmss" ) }.csv` );
                 document.body.appendChild( link );
                 link.click( );
                 link.remove( );

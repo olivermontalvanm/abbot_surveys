@@ -1,5 +1,5 @@
 import fs from "fs";
-import { connect, credentialsFile, e2eUsers, generatePassword, E2EUserKey } from "./db";
+import { connect, credentialsFile, e2eUsers, FORM_TITLE, generatePassword, E2EUserKey } from "./db";
 import { cleanup } from "./global-teardown";
 
 export default async function globalSetup( ) {
@@ -9,9 +9,9 @@ export default async function globalSetup( ) {
     const credentials = {} as Record<E2EUserKey, string>;
 
     try {
-        const [ forms ] = await db.query( "SELECT id, title FROM Survey WHERE title IN ( 'Visitas', ? )", [ "Actividades Especiales" ] );
+        const [ forms ] = await db.query( "SELECT id, title FROM Survey WHERE title IN ( 'Visitas', ? )", [ FORM_TITLE ] );
 
-        if( !( forms as { title: string }[ ] ).some( f => f.title === "Actividades Especiales" ) ) {
+        if( !( forms as { title: string }[ ] ).some( f => f.title === FORM_TITLE ) ) {
             throw new Error( "Run seeders/special_activities_form.js before the E2E tests" );
         }
 

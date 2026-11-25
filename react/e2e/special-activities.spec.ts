@@ -61,15 +61,15 @@ async function hospitalsFromDb( country?: string ) {
 const longTopic = "Capacitación sobre nutrición enteral en pacientes críticos, " +
     "manejo de bombas de infusión, \"buenas prácticas\" y revisión de casos clínicos del servicio. ".repeat( 4 );
 
-test.describe.serial( "Actividades Especiales", ( ) => {
+test.describe.serial( "Capacitaciones Especiales", ( ) => {
     test( "usuario con país: ve la tarjeta, solo hospitales de su país y puede enviar", async ( { page } ) => {
         await login( page, "user" );
 
-        const card = page.getByRole( "button", { name: /Actividades Especiales/ } );
+        const card = page.getByRole( "button", { name: /Capacitaciones Especiales/ } );
         await expect( card ).toBeVisible( );
         await card.click( );
         await expect( page ).toHaveURL( /\/forms\/special-activities$/ );
-        await expect( page.getByRole( "heading", { name: "Actividades Especiales" } ) ).toBeVisible( );
+        await expect( page.getByRole( "heading", { name: "Capacitaciones Especiales" } ) ).toBeVisible( );
 
         //  Not an admin: no link to responses
         await expect( page.getByRole( "button", { name: /Ver respuestas/ } ) ).toHaveCount( 0 );
@@ -144,7 +144,7 @@ test.describe.serial( "Actividades Especiales", ( ) => {
     test( "admin: ve hospitales de todos los países agrupados, las respuestas y descarga el CSV", async ( { page } ) => {
         await login( page, "admin" );
 
-        await page.getByRole( "button", { name: /Actividades Especiales/ } ).click( );
+        await page.getByRole( "button", { name: /Capacitaciones Especiales/ } ).click( );
         await expect( page ).toHaveURL( /\/forms\/special-activities$/ );
 
         const expected = await expectedHospitals( );
@@ -191,7 +191,7 @@ test.describe.serial( "Actividades Especiales", ( ) => {
         await page.getByRole( "button", { name: "Descargar" } ).click( );
         const download = await downloadPromise;
 
-        expect( download.suggestedFilename( ) ).toMatch( /^actividades_especiales_\d{8}_\d{6}\.csv$/ );
+        expect( download.suggestedFilename( ) ).toMatch( /^capacitaciones_especiales_\d{8}_\d{6}\.csv$/ );
 
         const csv = fs.readFileSync( await download.path( ), "utf-8" ).replace( /^﻿/, "" );
         const [ header ] = csv.split( "\n" );

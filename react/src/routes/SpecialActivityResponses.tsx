@@ -36,7 +36,7 @@ const SpecialActivityResponses: React.FC = () => {
 
             <Box p={ 2 }>
                 <Typography variant="h5">
-                    Registros de Actividades Especiales
+                    Registros de Capacitaciones Especiales
                 </Typography>
                 <Typography variant="body1" mb={"1.5rem"}>Hasta 50 registros más recientes</Typography>
                 {

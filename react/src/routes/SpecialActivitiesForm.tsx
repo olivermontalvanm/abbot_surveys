@@ -134,7 +134,7 @@ const SpecialActivitiesForm: FC = ( ) => {
                     boxSizing: "border-box", backgroundColor: "#ffffff", borderRadius: 3,
                     boxShadow: "0px 10px 15px -3px rgba(0,0,0,0.4)"
                 }}>
-                <Typography variant="h5" fontWeight={500} color="#1e4479" gutterBottom>Actividades Especiales</Typography>
+                <Typography variant="h5" fontWeight={500} color="#1e4479" gutterBottom>Capacitaciones Especiales</Typography>
                 {
                     locPermission ? null : (
                         <Alert severity="error" sx={{ mb: "1rem" }}>

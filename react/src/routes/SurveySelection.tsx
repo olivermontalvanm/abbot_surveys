@@ -19,7 +19,7 @@ export default function SurveyList() {
     //  Forms with their own page; the Survey entry only controls access to them
     const customForms: Record<string, string> = {
         "Visitas": "/forms/visits",
-        "Actividades Especiales": "/forms/special-activities"
+        "Capacitaciones Especiales": "/forms/special-activities"
     };
 
     const handleSelect = (survey: { id: string; title: string; }) => {
